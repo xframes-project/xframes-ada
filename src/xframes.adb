@@ -102,6 +102,32 @@ procedure Show_C_Func is
       return Temp;
    end Create_HEXA_As_JSON_Array;
 
+   function Create_Node (Id : Integer; Is_Root : Boolean) return JSON_Value is
+      Temp : JSON_Value;
+   begin
+      Temp := Create_Object;
+      Temp.Set_Field (Field_Name => "id", Field => Create (Integer'(Id)));
+      Temp.Set_Field
+        (Field_Name => "root", Field => Create (Boolean'(Is_Root)));
+      Temp.Set_Field (Field_Name => "type", Field => Create (String'("node")));
+
+      return Temp;
+   end Create_Node;
+
+   function Create_Unformatted_Text
+     (Id : Integer; Text : String) return JSON_Value
+   is
+      Temp : JSON_Value;
+   begin
+      Temp := Create_Object;
+      Temp.Set_Field (Field_Name => "id", Field => Create (Integer'(Id)));
+      Temp.Set_Field (Field_Name => "text", Field => Create (String'(Text)));
+      Temp.Set_Field
+        (Field_Name => "type", Field => Create (String'("unformatted-text")));
+
+      return Temp;
+   end Create_Unformatted_Text;
+
    procedure Set_Theme_Color_Json
      (Theme        : in out JSON_Value;
       Theme_Colors : JSON_Value;
@@ -120,14 +146,62 @@ procedure Show_C_Func is
       end;
    end Set_Theme_Color_Json;
 
+   procedure Set_Element (Element_Json : in out Interfaces.C.char_array);
+   pragma Import (C, Set_Element, "setElement");
+
+   procedure Set_Children
+     (Id : Integer; Children_Ids : in out Interfaces.C.char_array);
+   pragma Import (C, Set_Children, "setChildren");
+
    procedure Init;
    pragma Convention (C, Init);
 
    procedure Init is
-   begin
-      Put_Line ("Init called!");
+      Root_Node          : JSON_Value;
+      Unformatted_Text   : JSON_Value;
+      Children_Ids_Array : JSON_Array;
+      Children_Ids       : JSON_Value;
 
-      --
+      Root_Node_C_Char_Array       : Interfaces.C.char_array (1 .. 1024);
+      Root_Node_C_Char_Array_Count : Size_T;
+
+      Unformatted_Text_C_Char_Array       :
+        Interfaces.C.char_array (1 .. 1024);
+      Unformatted_Text_C_Char_Array_Count : Size_T;
+
+      Children_Ids_C_Char_Array       : Interfaces.C.char_array (1 .. 1024);
+      Children_Ids_C_Char_Array_Count : Size_T;
+   begin
+      Root_Node := Create_Node (0, True);
+      Unformatted_Text := Create_Unformatted_Text (1, "Hello, world");
+
+      To_C
+        (Item       => Root_Node.Write,
+         Target     => Root_Node_C_Char_Array,
+         Count      => Root_Node_C_Char_Array_Count,
+         Append_Nul => True);
+
+      To_C
+        (Item       => Unformatted_Text.Write,
+         Target     => Unformatted_Text_C_Char_Array,
+         Count      => Unformatted_Text_C_Char_Array_Count,
+         Append_Nul => True);
+
+      Children_Ids_Array := Empty_Array;
+
+      Append (Children_Ids_Array, Create (Integer'(1)));
+
+      Children_Ids := Create (Children_Ids_Array);
+
+      To_C
+        (Item       => Children_Ids.Write,
+         Target     => Children_Ids_C_Char_Array,
+         Count      => Children_Ids_C_Char_Array_Count,
+         Append_Nul => True);
+
+      Set_Element (Root_Node_C_Char_Array);
+      Set_Element (Unformatted_Text_C_Char_Array);
+      Set_Children (0, Children_Ids_C_Char_Array);
    end Init;
 
    procedure OnTextChanged
@@ -202,9 +276,6 @@ procedure Show_C_Func is
       Put_Line ("OnClick called with ID: " & Integer'Image (Id));
    end OnClick;
 
-   procedure Set_Element (Element_Json : in out Interfaces.C.char_array);
-   pragma Import (C, Set_Element, "setElement");
-
    Init_Address                         : System.Address := Init'Address;
    OnTextChanged_Address                : System.Address :=
      OnTextChanged'Address;
@@ -231,7 +302,7 @@ procedure Show_C_Func is
       OnClick                        : System.Address);
    pragma Import (C, Extern_Init, "init");
 
-   Assets_Base_Path               : constant String := "./assets/";
+   Assets_Base_Path               : constant String := "./assets";
    Raw_Font_Definitions           : String := "";
    Raw_Style_Override_Definitions : String := "";
 
@@ -270,11 +341,12 @@ begin
       Append (Font_Definitions, Tmp_Font_Definition);
    end loop;
 
-   -- Convert JSON_Array to JSON_Value
-   Font_Definitions_As_JSON_Value := Create (Font_Definitions);
+   Font_Definitions_As_JSON_Value := Create_Object;
+   Font_Definitions_As_JSON_Value.Set_Field
+     (Field_Name => "defs", Field => Create (Font_Definitions));
 
    To_C
-     (Item       => Write (Font_Definitions_As_JSON_Value),
+     (Item       => Font_Definitions_As_JSON_Value.Write,
       Target     => Raw_Font_Definitions_C,
       Count      => Raw_Font_Definitions_String_Length,
       Append_Nul => True);
