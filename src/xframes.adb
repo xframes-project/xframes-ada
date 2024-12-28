@@ -18,6 +18,62 @@ procedure Show_C_Func is
 
    use String_Hashed_Maps;
 
+   type ImGuiCol is
+     (Text,
+      TextDisabled,
+      WindowBg,
+      ChildBg,
+      PopupBg,
+      Border,
+      BorderShadow,
+      FrameBg,
+      FrameBgHovered,
+      FrameBgActive,
+      TitleBg,
+      TitleBgActive,
+      TitleBgCollapsed,
+      MenuBarBg,
+      ScrollbarBg,
+      ScrollbarGrab,
+      ScrollbarGrabHovered,
+      ScrollbarGrabActive,
+      CheckMark,
+      SliderGrab,
+      SliderGrabActive,
+      Button,
+      ButtonHovered,
+      ButtonActive,
+      Header,
+      HeaderHovered,
+      HeaderActive,
+      Separator,
+      SeparatorHovered,
+      SeparatorActive,
+      ResizeGrip,
+      ResizeGripHovered,
+      ResizeGripActive,
+      Tab,
+      TabHovered,
+      TabActive,
+      TabUnfocused,
+      TabUnfocusedActive,
+      PlotLines,
+      PlotLinesHovered,
+      PlotHistogram,
+      PlotHistogramHovered,
+      TableHeaderBg,
+      TableBorderStrong,
+      TableBorderLight,
+      TableRowBg,
+      TableRowBgAlt,
+      TextSelectedBg,
+      DragDropTarget,
+      NavHighlight,
+      NavWindowingHighlight,
+      NavWindowingDimBg,
+      ModalWindowDimBg,
+      COUNT);
+
    type OnInitCb is access procedure;
    type Char_Ptr is access all Interfaces.C.Char;
    type Float_Array is array (Positive range <>) of aliased Float;
@@ -34,6 +90,35 @@ procedure Show_C_Func is
    type OnClickCb is access procedure (Id : Integer);
 
    type Font_Sizes_Array is array (1 .. 8) of Integer;
+
+   function Create_HEXA_As_JSON_Array
+     (Color : String; Opacity : Float) return JSON_Array
+   is
+      Temp : JSON_Array;
+   begin
+      Temp := Empty_Array;
+      Append (Temp, Create (String'(Color)));
+      Append (Temp, Create (Float'(Opacity)));
+      return Temp;
+   end Create_HEXA_As_JSON_Array;
+
+   procedure Set_Theme_Color_Json
+     (Theme        : in out JSON_Value;
+      Theme_Colors : JSON_Value;
+      ImGui_Color  : ImGuiCol;
+      Color_Name   : String;
+      Opacity      : Float) is
+   begin
+
+      declare
+         Key         : String := Integer'Image (ImGuiCol'Pos (ImGui_Color));
+         Color_Value : String := String'(Theme_Colors.Get (Color_Name));
+      begin
+         Theme.Set_Field
+           (Field_Name => Key,
+            Field      => Create_HEXA_As_JSON_Array (Color_Value, Opacity));
+      end;
+   end Set_Theme_Color_Json;
 
    procedure Init;
    pragma Convention (C, Init);
@@ -175,6 +260,8 @@ procedure Show_C_Func is
    --  Theme_Colors : String_Hashed_Maps.Map;
 
    Theme_Colors : JSON_Value := Create_Object;
+
+   Theme : JSON_Value := Create_Object;
 begin
    -- Font definitions
 
@@ -196,17 +283,99 @@ begin
 
    -- Theme definition
 
-   Theme_Colors.Set_Field (Field_Name => "black", Field => "#1a1a1a");
-   Theme_Colors.Set_Field (Field_Name => "darkGrey", Field => "#5a5a5a");
-   Theme_Colors.Set_Field (Field_Name => "grey", Field => "#9a9a9a");
-   Theme_Colors.Set_Field (Field_Name => "lightGrey", Field => "#bebebe");
-   Theme_Colors.Set_Field (Field_Name => "veryLightGrey", Field => "#e5e5e5");
-   Theme_Colors.Set_Field (Field_Name => "superLightGrey", Field => "#f7f7f7");
+   Theme_Colors.Set_Field (Field_Name => "darkestGrey", Field => "#141f2c");
+   Theme_Colors.Set_Field (Field_Name => "darkerGrey", Field => "#2a2e39");
+   Theme_Colors.Set_Field (Field_Name => "darkGrey", Field => "#363b4a");
+   Theme_Colors.Set_Field (Field_Name => "lightGrey", Field => "#5a5a5a");
+   Theme_Colors.Set_Field (Field_Name => "lighterGrey", Field => "#7A818C");
+   Theme_Colors.Set_Field
+     (Field_Name => "evenLighterGrey", Field => "#8491a3");
+   Theme_Colors.Set_Field (Field_Name => "black", Field => "#0A0B0D");
+   Theme_Colors.Set_Field (Field_Name => "green", Field => "#75f986");
+   Theme_Colors.Set_Field (Field_Name => "red", Field => "#ff0062");
    Theme_Colors.Set_Field (Field_Name => "white", Field => "#fff");
-   Theme_Colors.Set_Field (Field_Name => "hero", Field => "#ff6e59");
-   Theme_Colors.Set_Field (Field_Name => "hoverHero", Field => "#hoverHero");
 
-   Put_Line ("Theme JSON Object: " & Theme_Colors.Write);
+   Set_Theme_Color_Json (Theme, Theme_Colors, Text, "white", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TextDisabled, "lighterGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, WindowBg, "black", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, ChildBg, "black", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, PopupBg, "white", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, Border, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, BorderShadow, "darkestGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, FrameBg, "black", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, FrameBgHovered, "darkerGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, FrameBgActive, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, TitleBg, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TitleBgActive, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TitleBgCollapsed, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, MenuBarBg, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, ScrollbarBg, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ScrollbarGrab, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ScrollbarGrabHovered, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ScrollbarGrabActive, "darkestGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, CheckMark, "darkestGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, SliderGrab, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, SliderGrabActive, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, Button, "black", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ButtonHovered, "darkerGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, ButtonActive, "black", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, Header, "black", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, HeaderHovered, "black", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, HeaderActive, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, Separator, "darkestGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, SeparatorHovered, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, SeparatorActive, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, ResizeGrip, "black", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ResizeGripHovered, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ResizeGripActive, "darkerGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, Tab, "black", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, TabHovered, "darkerGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, TabActive, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, TabUnfocused, "black", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TabUnfocusedActive, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, PlotLines, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, PlotLinesHovered, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, PlotHistogram, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, PlotHistogramHovered, "lightGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, TableHeaderBg, "black", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TableBorderStrong, "lightGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TableBorderLight, "darkerGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, TableRowBg, "darkGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TableRowBgAlt, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, TextSelectedBg, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, DragDropTarget, "darkerGrey", 1.0);
+   Set_Theme_Color_Json (Theme, Theme_Colors, NavHighlight, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, NavWindowingHighlight, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, NavWindowingDimBg, "darkerGrey", 1.0);
+   Set_Theme_Color_Json
+     (Theme, Theme_Colors, ModalWindowDimBg, "darkerGrey", 1.0);
+
+   Put_Line ("Theme JSON Object: " & Theme.Write);
 
    Extern_Init
      (Assets_Base_Path_Ptr,
