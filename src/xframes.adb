@@ -237,8 +237,8 @@ procedure Show_C_Func is
 
    Assets_Base_Path_C               : Interfaces.C.char_array :=
      To_C (Assets_Base_Path);
-   Raw_Font_Definitions_C           : Interfaces.C.char_array (1 .. 1024);
-   Raw_Style_Override_Definitions_C : Interfaces.C.char_array (1 .. 4096);
+   Raw_Font_Definitions_C           : Interfaces.C.char_array (1 .. 1024 * 5);
+   Raw_Style_Override_Definitions_C : Interfaces.C.char_array (1 .. 1024 * 10);
 
    Raw_Font_Definitions_String_Length           : Size_T;
    Raw_Style_Override_Definitions_String_Length : Size_T;
