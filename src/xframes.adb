@@ -215,9 +215,9 @@ procedure Show_C_Func is
    OnClick_Address                      : System.Address := OnClick'Address;
 
    procedure Extern_Init
-     (Assets_Base_Path               : Char_Ptr;
-      Raw_Font_Definitions           : Char_Ptr;
-      Raw_Style_Override_Definitions : Char_Ptr;
+     (Assets_Base_Path               : in out Interfaces.C.char_array;
+      Raw_Font_Definitions           : in out Interfaces.C.char_array;
+      Raw_Style_Override_Definitions : in out Interfaces.C.char_array;
       OnInit                         : System.Address;
       OnTextChanged                  : System.Address;
       OnComboChanged                 : System.Address;
@@ -228,24 +228,21 @@ procedure Show_C_Func is
    pragma Import (C, Extern_Init, "init");
 
    Assets_Base_Path               : constant String := "./assets/";
-   Raw_Font_Definitions           : constant String :=
-     "{...font definitions...}";
-   Raw_Style_Override_Definitions : constant String :=
-     "{...style overrides...}";
+   Raw_Font_Definitions           : String := "";
+   Raw_Style_Override_Definitions : String := "";
 
-   Assets_Base_Path_C               : constant Interfaces.C.char_array :=
+   Assets_Base_Path_C               : Interfaces.C.char_array :=
      To_C (Assets_Base_Path);
-   Raw_Font_Definitions_C           : constant Interfaces.C.char_array :=
-     To_C (Raw_Font_Definitions);
-   Raw_Style_Override_Definitions_C : constant Interfaces.C.char_array :=
-     To_C (Raw_Style_Override_Definitions);
+   Raw_Font_Definitions_C           : Interfaces.C.char_array (1 .. 1024);
+   Raw_Style_Override_Definitions_C : Interfaces.C.char_array (1 .. 4096);
+
+   Raw_Font_Definitions_String_Length           : Size_T;
+   Raw_Style_Override_Definitions_String_Length : Size_T;
 
    Assets_Base_Path_Ptr               : constant Char_Ptr :=
      new Interfaces.C.Char'(Assets_Base_Path_C (1));
-   Raw_Font_Definitions_Ptr           : constant Char_Ptr :=
-     new Interfaces.C.Char'(Raw_Font_Definitions_C (1));
-   Raw_Style_Override_Definitions_Ptr : constant Char_Ptr :=
-     new Interfaces.C.Char'(Raw_Style_Override_Definitions_C (1));
+   Raw_Font_Definitions_Ptr           : Char_Ptr;
+   Raw_Style_Override_Definitions_Ptr : Char_Ptr;
 
    Input_String : String (1 .. 100);
    Last_Index   : Natural;
@@ -255,7 +252,6 @@ procedure Show_C_Func is
    Font_Definitions               : JSON_Array := Empty_Array;
    Tmp_Font_Definition            : JSON_Value;
    Font_Definitions_As_JSON_Value : JSON_Value;
-   JSON_String                    : Ada.Strings.Unbounded.Unbounded_String;
 
    --  Theme_Colors : String_Hashed_Maps.Map;
 
@@ -275,11 +271,16 @@ begin
       Append (Font_Definitions, Tmp_Font_Definition);
    end loop;
 
-   -- Convert JSON_Array to unbounded string
+   -- Convert JSON_Array to JSON_Value
    Font_Definitions_As_JSON_Value := Create (Font_Definitions);
-   JSON_String := Write (Font_Definitions_As_JSON_Value);
 
-   Put_Line (To_String (JSON_String));
+   To_C
+     (Item       => Write (Font_Definitions_As_JSON_Value),
+      Target     => Raw_Font_Definitions_C,
+      Count      => Raw_Font_Definitions_String_Length,
+      Append_Nul => True);
+
+   Put_Line (Write (Font_Definitions_As_JSON_Value));
 
    -- Theme definition
 
@@ -377,10 +378,16 @@ begin
 
    Put_Line ("Theme JSON Object: " & Theme.Write);
 
+   To_C
+     (Item       => Theme.Write,
+      Target     => Raw_Style_Override_Definitions_C,
+      Count      => Raw_Style_Override_Definitions_String_Length,
+      Append_Nul => True);
+
    Extern_Init
-     (Assets_Base_Path_Ptr,
-      Raw_Font_Definitions_Ptr,
-      Raw_Style_Override_Definitions_Ptr,
+     (Assets_Base_Path_C,
+      Raw_Font_Definitions_C,
+      Raw_Style_Override_Definitions_C,
       Init_Address,
       OnTextChanged_Address,
       OnComboChanged_Address,
