@@ -75,9 +75,9 @@ procedure Show_C_Func is
       COUNT);
 
    type OnInitCb is access procedure;
-   type Char_Ptr is access all Interfaces.C.Char;
    type Float_Array is array (Positive range <>) of aliased Float;
-   type OnTextChangedCb is access procedure (Id : Integer; Text : Char_Ptr);
+   type OnTextChangedCb is
+     access procedure (Id : Integer; Text : in out Interfaces.C.char_array);
    type OnComboChangedCb is
      access procedure (Id : Integer; Selected_Option_Id : Integer);
    type OnNumericValueChangedCb is
@@ -125,13 +125,17 @@ procedure Show_C_Func is
 
    procedure Init is
    begin
-      Put_Line ("Init called with");
+      Put_Line ("Init called!");
+
+      --
    end Init;
 
-   procedure OnTextChanged (Id : Integer; Text : Char_Ptr);
+   procedure OnTextChanged
+     (Id : Integer; Text : in out Interfaces.C.char_array);
    pragma Convention (C, OnTextChanged);
 
-   procedure OnTextChanged (Id : Integer; Text : Char_Ptr) is
+   procedure OnTextChanged
+     (Id : Integer; Text : in out Interfaces.C.char_array) is
    begin
       Put_Line
         ("OnTextChanged called with ID: "
@@ -198,7 +202,7 @@ procedure Show_C_Func is
       Put_Line ("OnClick called with ID: " & Integer'Image (Id));
    end OnClick;
 
-   procedure Set_Element (Element_Json : Char_Ptr);
+   procedure Set_Element (Element_Json : in out Interfaces.C.char_array);
    pragma Import (C, Set_Element, "setElement");
 
    Init_Address                         : System.Address := Init'Address;
@@ -238,11 +242,6 @@ procedure Show_C_Func is
 
    Raw_Font_Definitions_String_Length           : Size_T;
    Raw_Style_Override_Definitions_String_Length : Size_T;
-
-   Assets_Base_Path_Ptr               : constant Char_Ptr :=
-     new Interfaces.C.Char'(Assets_Base_Path_C (1));
-   Raw_Font_Definitions_Ptr           : Char_Ptr;
-   Raw_Style_Override_Definitions_Ptr : Char_Ptr;
 
    Input_String : String (1 .. 100);
    Last_Index   : Natural;
