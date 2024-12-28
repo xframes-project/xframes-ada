@@ -1,0 +1,15 @@
+name = "xframes"
+description = ""
+version = "0.1.0-dev"
+
+authors = ["Andrea Mancuso"]
+maintainers = ["Andrea Mancuso <and.mancuso@googlemail.com>"]
+maintainers-logins = ["andreamancuso"]
+licenses = "MIT"
+website = ""
+tags = []
+
+executables = ["xframes"]
+
+[[depends-on]]
+gnatcoll = "^25.0.0"

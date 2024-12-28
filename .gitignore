@@ -10,3 +10,9 @@ obj/
 native/
 
 .vscode
+
+/obj/
+/bin/
+/alire/
+/config/
+
