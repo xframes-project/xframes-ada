@@ -3,11 +3,20 @@ with Interfaces.C;          use Interfaces.C;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Float_Text_IO;     use Ada.Float_Text_IO;
-with Ada.Containers.Vectors;
+with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Strings.Hash;
 with GNATCOLL.JSON;         use GNATCOLL.JSON;
 with GNATCOLL.Strings;      use GNATCOLL.Strings;
 
 procedure Show_C_Func is
+   package String_Hashed_Maps is new
+     Ada.Containers.Indefinite_Hashed_Maps
+       (Key_Type        => String,
+        Element_Type    => String,
+        Hash            => Ada.Strings.Hash,
+        Equivalent_Keys => "=");
+
+   use String_Hashed_Maps;
 
    type OnInitCb is access procedure;
    type Char_Ptr is access all Interfaces.C.Char;
@@ -163,7 +172,12 @@ procedure Show_C_Func is
    Font_Definitions_As_JSON_Value : JSON_Value;
    JSON_String                    : Ada.Strings.Unbounded.Unbounded_String;
 
+   --  Theme_Colors : String_Hashed_Maps.Map;
+
+   Theme_Colors : JSON_Value := Create_Object;
 begin
+   -- Font definitions
+
    for I in Font_Sizes'Range loop
       Tmp_Font_Definition := Create_Object;
       Tmp_Font_Definition.Set_Field
@@ -174,11 +188,25 @@ begin
       Append (Font_Definitions, Tmp_Font_Definition);
    end loop;
 
+   -- Convert JSON_Array to unbounded string
    Font_Definitions_As_JSON_Value := Create (Font_Definitions);
-
    JSON_String := Write (Font_Definitions_As_JSON_Value);
 
    Put_Line (To_String (JSON_String));
+
+   -- Theme definition
+
+   Theme_Colors.Set_Field (Field_Name => "black", Field => "#1a1a1a");
+   Theme_Colors.Set_Field (Field_Name => "darkGrey", Field => "#5a5a5a");
+   Theme_Colors.Set_Field (Field_Name => "grey", Field => "#9a9a9a");
+   Theme_Colors.Set_Field (Field_Name => "lightGrey", Field => "#bebebe");
+   Theme_Colors.Set_Field (Field_Name => "veryLightGrey", Field => "#e5e5e5");
+   Theme_Colors.Set_Field (Field_Name => "superLightGrey", Field => "#f7f7f7");
+   Theme_Colors.Set_Field (Field_Name => "white", Field => "#fff");
+   Theme_Colors.Set_Field (Field_Name => "hero", Field => "#ff6e59");
+   Theme_Colors.Set_Field (Field_Name => "hoverHero", Field => "#hoverHero");
+
+   Put_Line ("Theme JSON Object: " & Theme_Colors.Write);
 
    Extern_Init
      (Assets_Base_Path_Ptr,
