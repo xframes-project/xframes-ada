@@ -8,7 +8,7 @@ with Ada.Strings.Hash;
 with GNATCOLL.JSON;         use GNATCOLL.JSON;
 with GNATCOLL.Strings;      use GNATCOLL.Strings;
 
-procedure Show_C_Func is
+procedure Main is
    package String_Hashed_Maps is new
      Ada.Containers.Indefinite_Hashed_Maps
        (Key_Type        => String,
@@ -468,4 +468,4 @@ begin
       OnClick_Address);
 
    Get_Line (Input_String, Last_Index);
-end Show_C_Func;
+end Main;
