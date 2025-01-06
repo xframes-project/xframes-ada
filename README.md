@@ -2,7 +2,19 @@
 
 ## Requirements
 
-- [alire](https://alire.ada.dev/)
+### Install Ada and Alire
+
+Follow these instructions: https://alire.ada.dev/transition_from_gnat_community.html
+
+Start by installing Alire: https://alire.ada.dev/
+
+You can still download GNAT Studio community edition (the official Ada IDE) here: https://github.com/AdaCore/gnatstudio/releases
+
+That said, The `Ada & SPARK` VS Code extension is also available and it is recommended over GNAT Studio. https://marketplace.visualstudio.com/items?itemName=AdaCore.ada
+
+### Running the application
+
+Launch an Alire Powershell then run `alr run`
 
 ### Screenshots
 
