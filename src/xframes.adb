@@ -74,21 +74,7 @@ procedure Main is
       ModalWindowDimBg,
       COUNT);
 
-   type OnInitCb is access procedure;
    type Float_Array is array (Positive range <>) of aliased Float;
-   type OnTextChangedCb is
-     access procedure (Id : Integer; Text : in out Interfaces.C.char_array);
-   type OnComboChangedCb is
-     access procedure (Id : Integer; Selected_Option_Id : Integer);
-   type OnNumericValueChangedCb is
-     access procedure (Id : Integer; Value : Float);
-   type OnBooleanValueChangedCb is
-     access procedure (Id : Integer; Value : Boolean);
-   type OnMultipleNumericValuesChangedCb is
-     access procedure
-       (Id : Integer; Values : access Float_Array; NumValues : Integer);
-   type OnClickCb is access procedure (Id : Integer);
-
    type Font_Sizes_Array is array (1 .. 8) of Integer;
 
    function Create_HEXA_As_JSON_Array
