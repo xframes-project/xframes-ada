@@ -12,6 +12,10 @@ You can still download GNAT Studio community edition (the official Ada IDE) here
 
 That said, The `Ada & SPARK` VS Code extension is also available and it is recommended over GNAT Studio. https://marketplace.visualstudio.com/items?itemName=AdaCore.ada
 
+#### Raspberry Pi
+
+You need to install `gnat` and `gpruild` though `apt`. You can then proceed to build `alire` (refer to the official documentation). 
+
 ### Running the application
 
 Launch an Alire Powershell then run `alr run`
