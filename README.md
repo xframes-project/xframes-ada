@@ -21,3 +21,10 @@ Launch an Alire Powershell then run `alr run`
 #### Windows 11
 
 ![image](https://github.com/user-attachments/assets/5cecfba1-38f0-438c-a533-59433c39ba1b)
+
+#### Raspberry Pi
+
+Uses Alire (built from source) and 'local' toolchain based system packages `gnat` and `gprbuild`.
+
+![image](https://github.com/user-attachments/assets/36c971e3-0034-420a-acb7-3720f167f270)
+
